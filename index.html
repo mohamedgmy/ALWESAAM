@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="logo.png" type="image/x-icon">
+    <title>مطبعة الوسام — حاسبة التكلفة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <!-- خلفية متحركة -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- الهيدر -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="logo.png" alt="مطبعة الوسام" class="logo-img">
+                </div>
+                <div class="logo-text">
+                    <h1>مطبعة الوسام</h1>
+                    <p>حاسبة تكلفة المنتج</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- النموذج الرئيسي -->
+        <main class="main-content">
+            <form id="calculatorForm" class="calculator-form" onsubmit="return false;">
+
+                <!-- 1. حقل الخام -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">1</span>
+                        <div class="section-title">
+                            <h2>الخام</h2>
+                            <p>احسب تكلفة المادة الخام: الطول × العرض × الغراماج × العدد = الوزن، ثم الوزن × السعر = الخام</p>
+                        </div>
+                    </div>
+                    <div class="raw-calc-grid">
+                        <div class="raw-calc-field">
+                            <label class="raw-calc-label">الطول (م)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rawLength" min="0" step="0.01" placeholder="0.00" class="text-input" oninput="calculateRaw()">
+                            </div>
+                        </div>
+                        <div class="raw-calc-operator">×</div>
+                        <div class="raw-calc-field">
+                            <label class="raw-calc-label">العرض (م)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rawWidth" min="0" step="0.01" placeholder="0.00" class="text-input" oninput="calculateRaw()">
+                            </div>
+                        </div>
+                        <div class="raw-calc-operator">×</div>
+                        <div class="raw-calc-field">
+                            <label class="raw-calc-label">الغراماج</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rawGrammage" min="0" step="0.01" placeholder="0.00" class="text-input" oninput="calculateRaw()">
+                            </div>
+                        </div>
+                        <div class="raw-calc-operator">×</div>
+                        <div class="raw-calc-field">
+                            <label class="raw-calc-label">العدد</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rawCount" min="0" step="1" placeholder="0" class="text-input" oninput="calculateRaw()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="raw-result-row">
+                        <div class="raw-result-box">
+                            <span class="raw-result-label">الوزن</span>
+                            <span class="raw-result-value" id="rawWeight">0.00</span>
+                        </div>
+                        <div class="raw-calc-operator">=</div>
+                        <div class="raw-calc-field raw-price-field">
+                            <label class="raw-calc-label">سعر الكيلو ($)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rawPrice" min="0" step="0.01" placeholder="0.00" class="text-input" oninput="calculateRaw()">
+                                <span class="input-suffix">$</span>
+                            </div>
+                        </div>
+                        <div class="raw-calc-operator">=</div>
+                        <div class="raw-result-box raw-result-final">
+                            <span class="raw-result-label">الخام</span>
+                            <span class="raw-result-value" id="rawTotal">0.00$</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. حقل الطباعة -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">2</span>
+                        <div class="section-title">
+                            <h2>الطباعة</h2>
+                            <p>اختر مقاس الطباعة المناسب</p>
+                        </div>
+                    </div>
+                    <div class="options-grid">
+                        <label class="option-card">
+                            <input type="radio" name="printing" value="50" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">50 × 35</span>
+                                <span class="option-price">50$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="printing" value="100" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">50 × 70</span>
+                                <span class="option-price">100$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="printing" value="150" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">70 × 100</span>
+                                <span class="option-price">150$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. حقل السولوفان -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">3</span>
+                        <div class="section-title">
+                            <h2>السولوفان</h2>
+                            <p>اختر المقاس ثم أدخل الكمية (لكل 1000 قطعة)</p>
+                        </div>
+                    </div>
+                    <div class="options-grid">
+                        <label class="option-card">
+                            <input type="radio" name="cellophane" value="15" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">50 × 35</span>
+                                <span class="option-price">15$</span>
+                                <span class="option-unit">لكل 1000</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="cellophane" value="30" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">70 × 50</span>
+                                <span class="option-price">30$</span>
+                                <span class="option-unit">لكل 1000</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="cellophane" value="70" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-size">70 × 100</span>
+                                <span class="option-price">70$</span>
+                                <span class="option-unit">لكل 1000</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="input-group cellophane-qty-group" style="margin-top: 14px;">
+                        <label class="qty-label">الكمية (عدد القطع)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="cellophaneQuantity" min="0" step="1000" placeholder="مثال: 1000, 2000, 3000..." class="text-input" oninput="calculateTotal()">
+                            <span class="input-suffix">قطعة</span>
+                        </div>
+                        <div class="rate-info">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <circle cx="8" cy="8" r="7" stroke="#8b7355" stroke-width="1.5"/>
+                                <path d="M8 5v4M8 11h.01" stroke="#8b7355" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                            <span>السعر يُحسب لكل 1000 قطعة</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. حقل الكبس -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">4</span>
+                        <div class="section-title">
+                            <h2>الكبس</h2>
+                            <p>اختر تكلفة الكبس المناسبة</p>
+                        </div>
+                    </div>
+                    <div class="options-grid options-grid-4">
+                        <label class="option-card">
+                            <input type="radio" name="pressing" value="25" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-price">25$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="pressing" value="50" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-price">50$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="pressing" value="75" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-price">75$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="pressing" value="100" onchange="calculateTotal()">
+                            <div class="option-content">
+                                <span class="option-price">100$</span>
+                            </div>
+                            <div class="option-check">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 10l3 3 7-7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 5. حقل الخيط -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">5</span>
+                        <div class="section-title">
+                            <h2>الخيط</h2>
+                            <p>اختياري — كل 1000 وحدة = 50$</p>
+                        </div>
+                    </div>
+                    <div class="optional-field">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="threadToggle" onchange="toggleThread()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">تفعيل الخيط</span>
+                        </label>
+                        <div class="input-group thread-input" id="threadInputGroup" style="display: none;">
+                            <div class="input-wrapper">
+                                <input type="number" id="threadQuantity" min="0" step="1" placeholder="أدخل الكمية" class="text-input" oninput="calculateTotal()">
+                                <span class="input-suffix">وحدة</span>
+                            </div>
+                            <div class="rate-info">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <circle cx="8" cy="8" r="7" stroke="#8b7355" stroke-width="1.5"/>
+                                    <path d="M8 5v4M8 11h.01" stroke="#8b7355" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>كل 1000 وحدة = 50$</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. حقل القالب -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">6</span>
+                        <div class="section-title">
+                            <h2>القالب</h2>
+                            <p>تكلفة ثابتة</p>
+                        </div>
+                    </div>
+                    <div class="fixed-value-card">
+                        <span class="fixed-label">التكلفة الثابتة</span>
+                        <span class="fixed-price">50$</span>
+                    </div>
+                </div>
+
+                <!-- 7. حقل اللزق -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">7</span>
+                        <div class="section-title">
+                            <h2>اللزق</h2>
+                            <p>اختياري — كل 1000 وحدة = 2.5$</p>
+                        </div>
+                    </div>
+                    <div class="optional-field">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="glueToggle" onchange="toggleGlue()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">تفعيل اللزق</span>
+                        </label>
+                        <div class="input-group glue-input" id="glueInputGroup" style="display: none;">
+                            <div class="input-wrapper">
+                                <input type="number" id="glueQuantity" min="0" step="1" placeholder="أدخل الكمية" class="text-input" oninput="calculateTotal()">
+                                <span class="input-suffix">وحدة</span>
+                            </div>
+                            <div class="rate-info">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                    <circle cx="8" cy="8" r="7" stroke="#8b7355" stroke-width="1.5"/>
+                                    <path d="M8 5v4M8 11h.01" stroke="#8b7355" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                                <span>كل 1000 وحدة = 2.5$</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. حقل النقل -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-number">8</span>
+                        <div class="section-title">
+                            <h2>النقل</h2>
+                            <p>اختياري — أدخل تكلفة النقل إن وجدت</p>
+                        </div>
+                    </div>
+                    <div class="optional-field">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="transportToggle" onchange="toggleTransport()">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">تفعيل النقل</span>
+                        </label>
+                        <div class="input-group transport-input" id="transportInputGroup" style="display: none;">
+                            <div class="input-wrapper">
+                                <input type="number" id="transportCost" min="0" step="0.01" placeholder="أدخل تكلفة النقل" class="text-input" oninput="calculateTotal()">
+                                <span class="input-suffix">$</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- بطاقة النتيجة -->
+            <div class="result-card" id="resultCard">
+                <div class="result-header">
+                    <h2>ملخص التكلفة</h2>
+                    <button class="reset-btn" onclick="resetForm()" title="إعادة تعيين">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 10a7 7 0 0112.9-3.7M17 10a7 7 0 01-12.9 3.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M3 4v3.3h3.3M17 16v-3.3h-3.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        إعادة تعيين
+                    </button>
+                </div>
+                <div class="result-items" id="resultItems">
+                    <div class="result-item">
+                        <span class="item-name">الخام</span>
+                        <span class="item-value" id="resRaw">0.00$</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="item-name">الطباعة</span>
+                        <span class="item-value" id="resPrinting">0.00$</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="item-name">السولوفان</span>
+                        <span class="item-value" id="resCellophane">0.00$</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="item-name">الكبس</span>
+                        <span class="item-value" id="resPressing">0.00$</span>
+                    </div>
+                    <div class="result-item" id="resThreadRow" style="display: none;">
+                        <span class="item-name">الخيط</span>
+                        <span class="item-value" id="resThread">0.00$</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="item-name">القالب</span>
+                        <span class="item-value" id="resMold">50.00$</span>
+                    </div>
+                    <div class="result-item" id="resGlueRow" style="display: none;">
+                        <span class="item-name">اللزق</span>
+                        <span class="item-value" id="resGlue">0.00$</span>
+                    </div>
+                    <div class="result-item" id="resTransportRow" style="display: none;">
+                        <span class="item-name">النقل</span>
+                        <span class="item-value" id="resTransport">0.00$</span>
+                    </div>
+                </div>
+                <div class="result-total">
+                    <span class="total-label">السعر النهائي</span>
+                    <span class="total-value" id="totalPrice">50.00$</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- الفوتر -->
+        <footer class="footer">
+            <p>© 2026 مطبعة الوسام — كافة فنون الطباعة الحديثة</p>
+        </footer>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
