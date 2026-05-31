@@ -20,7 +20,7 @@ function formatPrice(value) {
  * @returns {number}
  */
 function getRadioValue(name) {
-    const selected = document.querySelector('input[name="' + name + '"]:checked');
+    var selected = document.querySelector('input[name="' + name + '"]:checked');
     return selected ? parseFloat(selected.value) : 0;
 }
 
@@ -38,6 +38,21 @@ function toggleThread() {
     } else {
         inputGroup.style.display = 'none';
         threadInput.value = '';
+    }
+    calculateTotal();
+}
+
+/**
+ * Toggle mold (القالب) visibility
+ */
+function toggleMold() {
+    var toggle = document.getElementById('moldToggle');
+    var costDisplay = document.getElementById('moldCostDisplay');
+
+    if (toggle.checked) {
+        costDisplay.style.display = 'block';
+    } else {
+        costDisplay.style.display = 'none';
     }
     calculateTotal();
 }
@@ -80,8 +95,10 @@ function toggleTransport() {
 
 /**
  * Calculate raw material cost from dimensions
- * Formula: Weight = Length × Width × Grammage × Count
+ * Formula: Weight (kg) = Length(m) × Width(m) × Grammage(g/m²) × Count / 1000
  *          Raw Cost = Weight × Price per kg
+ * 
+ * The division by 1000 converts grams to kilograms
  */
 function calculateRaw() {
     var length = parseFloat(document.getElementById('rawLength').value) || 0;
@@ -90,7 +107,8 @@ function calculateRaw() {
     var count = parseFloat(document.getElementById('rawCount').value) || 0;
     var price = parseFloat(document.getElementById('rawPrice').value) || 0;
 
-    var weight = length * width * grammage * count;
+    // Weight in kg = length(m) × width(m) × grammage(g/m²) × count / 1000
+    var weight = (length * width * grammage * count) / 1000;
     var rawTotal = weight * price;
 
     document.getElementById('rawWeight').textContent = weight.toFixed(2);
@@ -101,28 +119,31 @@ function calculateRaw() {
 
 /**
  * Calculate the total cost and update the result card
+ * 
+ * الجمع التراكمي: يبدأ من الخام ثم يضاف عليه الطباعة ثم السولوفان وهكذا
+ * بحيث كل إضافة تُضاف على المبلغ الأول (الخام) بالترتيب
  */
 function calculateTotal() {
-    // 1. Raw material (calculated from dimensions)
+    // 1. Raw material (calculated from dimensions) - القاعدة الأساسية
     var length = parseFloat(document.getElementById('rawLength').value) || 0;
     var width = parseFloat(document.getElementById('rawWidth').value) || 0;
     var grammage = parseFloat(document.getElementById('rawGrammage').value) || 0;
     var count = parseFloat(document.getElementById('rawCount').value) || 0;
     var price = parseFloat(document.getElementById('rawPrice').value) || 0;
-    var rawValue = length * width * grammage * count * price;
+    var rawValue = (length * width * grammage * count) / 1000 * price;
 
-    // 2. Printing
+    // 2. Printing - تُضاف على الخام
     var printingValue = getRadioValue('printing');
 
-    // 3. Cellophane (price per 1000 × quantity)
+    // 3. Cellophane (price per 1000 × quantity) - تُضاف على المجموع
     var cellophaneRate = getRadioValue('cellophane');
     var cellophaneQty = parseFloat(document.getElementById('cellophaneQuantity').value) || 0;
     var cellophaneValue = (cellophaneQty / 1000) * cellophaneRate;
 
-    // 4. Pressing (selectable)
+    // 4. Pressing (selectable) - تُضاف على المجموع
     var pressingValue = getRadioValue('pressing');
 
-    // 5. Thread (optional)
+    // 5. Thread (optional) - تُضاف على المجموع
     var threadValue = 0;
     var threadToggle = document.getElementById('threadToggle');
     var threadRow = document.getElementById('resThreadRow');
@@ -134,10 +155,18 @@ function calculateTotal() {
         threadRow.style.display = 'none';
     }
 
-    // 6. Mold (fixed)
-    var moldValue = FIXED_MOLD;
+    // 6. Mold (optional - fixed 50$) - تُضاف على المجموع
+    var moldValue = 0;
+    var moldToggle = document.getElementById('moldToggle');
+    var moldRow = document.getElementById('resMoldRow');
+    if (moldToggle.checked) {
+        moldValue = FIXED_MOLD;
+        moldRow.style.display = 'flex';
+    } else {
+        moldRow.style.display = 'none';
+    }
 
-    // 7. Glue (optional)
+    // 7. Glue (optional) - تُضاف على المجموع
     var glueValue = 0;
     var glueToggle = document.getElementById('glueToggle');
     var glueRow = document.getElementById('resGlueRow');
@@ -149,7 +178,7 @@ function calculateTotal() {
         glueRow.style.display = 'none';
     }
 
-    // 8. Transport (optional)
+    // 8. Transport (optional) - تُضاف على المجموع
     var transportValue = 0;
     var transportToggle = document.getElementById('transportToggle');
     var transportRow = document.getElementById('resTransportRow');
@@ -170,7 +199,8 @@ function calculateTotal() {
     document.getElementById('resGlue').textContent = formatPrice(glueValue);
     document.getElementById('resTransport').textContent = formatPrice(transportValue);
 
-    // Calculate total
+    // Calculate total - الجمع التراكمي بالترتيب
+    // الخام + الطباعة + السولوفان + الكبس + الخيط + القالب + اللزق + النقل
     var total = rawValue + printingValue + cellophaneValue + pressingValue + threadValue + moldValue + glueValue + transportValue;
 
     // Update total with animation
@@ -186,8 +216,14 @@ function calculateTotal() {
  * Reset the entire form
  */
 function resetForm() {
-    // Reset raw material
-    document.getElementById('rawMaterial').value = '';
+    // Reset raw material fields
+    document.getElementById('rawLength').value = '';
+    document.getElementById('rawWidth').value = '';
+    document.getElementById('rawGrammage').value = '';
+    document.getElementById('rawCount').value = '';
+    document.getElementById('rawPrice').value = '';
+    document.getElementById('rawWeight').textContent = '0.00';
+    document.getElementById('rawTotal').textContent = '0.00$';
 
     // Reset radio buttons
     var radios = document.querySelectorAll('input[type="radio"]');
@@ -202,6 +238,10 @@ function resetForm() {
     document.getElementById('threadToggle').checked = false;
     document.getElementById('threadInputGroup').style.display = 'none';
     document.getElementById('threadQuantity').value = '';
+
+    // Reset mold
+    document.getElementById('moldToggle').checked = false;
+    document.getElementById('moldCostDisplay').style.display = 'none';
 
     // Reset glue
     document.getElementById('glueToggle').checked = false;
