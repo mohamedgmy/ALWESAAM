@@ -20,7 +20,7 @@ function formatPrice(value) {
  * @returns {number}
  */
 function getRadioValue(name) {
-    var selected = document.querySelector('input[name="' + name + '"]:checked');
+    const selected = document.querySelector('input[name="' + name + '"]:checked');
     return selected ? parseFloat(selected.value) : 0;
 }
 
@@ -43,16 +43,16 @@ function toggleThread() {
 }
 
 /**
- * Toggle mold (القالب) visibility
+ * Toggle mold (القالب) on/off
  */
 function toggleMold() {
     var toggle = document.getElementById('moldToggle');
-    var costDisplay = document.getElementById('moldCostDisplay');
+    var infoBox = document.getElementById('moldInfoBox');
 
     if (toggle.checked) {
-        costDisplay.style.display = 'block';
+        infoBox.style.display = 'block';
     } else {
-        costDisplay.style.display = 'none';
+        infoBox.style.display = 'none';
     }
     calculateTotal();
 }
@@ -95,10 +95,9 @@ function toggleTransport() {
 
 /**
  * Calculate raw material cost from dimensions
- * Formula: Weight (kg) = Length(m) × Width(m) × Grammage(g/m²) × Count / 1000
+ * Formula: Weight (kg) = (Length × Width × Grammage × Count) / 1000
  *          Raw Cost = Weight × Price per kg
- * 
- * The division by 1000 converts grams to kilograms
+ * Note: Grammage is in g/m², so dividing by 1000 converts total weight to kg
  */
 function calculateRaw() {
     var length = parseFloat(document.getElementById('rawLength').value) || 0;
@@ -107,108 +106,176 @@ function calculateRaw() {
     var count = parseFloat(document.getElementById('rawCount').value) || 0;
     var price = parseFloat(document.getElementById('rawPrice').value) || 0;
 
-    // Weight in kg = length(m) × width(m) × grammage(g/m²) × count / 1000
     var weight = (length * width * grammage * count) / 1000;
     var rawTotal = weight * price;
 
     document.getElementById('rawWeight').textContent = weight.toFixed(2);
     document.getElementById('rawTotal').textContent = formatPrice(rawTotal);
 
-    calculateTotal();
+    // Show/hide digit selection based on raw total
+    var digitsSection = document.getElementById('digitsSelection');
+    if (rawTotal > 0) {
+        digitsSection.style.display = 'block';
+    } else {
+        digitsSection.style.display = 'none';
+    }
+
+    applyDigitSelection();
 }
 
 /**
- * Calculate the total cost and update the result card
- * 
- * الجمع التراكمي: يبدأ من الخام ثم يضاف عليه الطباعة ثم السولوفان وهكذا
- * بحيث كل إضافة تُضاف على المبلغ الأول (الخام) بالترتيب
+ * Extract first N digits from a number (integer part only)
+ * @param {number} value - The full raw value
+ * @param {number} digits - Number of leading digits to keep (0 = full)
+ * @returns {number}
  */
-function calculateTotal() {
-    // 1. Raw material (calculated from dimensions) - القاعدة الأساسية
+function extractDigits(value, digits) {
+    if (digits === 0 || digits === null) return value;
+    var intPart = Math.floor(Math.abs(value));
+    var str = intPart.toString();
+    if (digits >= str.length) return intPart;
+    var extracted = parseInt(str.substring(0, digits), 10);
+    return extracted;
+}
+
+/**
+ * Apply the digit selection and update the adopted raw value
+ */
+function applyDigitSelection() {
     var length = parseFloat(document.getElementById('rawLength').value) || 0;
     var width = parseFloat(document.getElementById('rawWidth').value) || 0;
     var grammage = parseFloat(document.getElementById('rawGrammage').value) || 0;
     var count = parseFloat(document.getElementById('rawCount').value) || 0;
     var price = parseFloat(document.getElementById('rawPrice').value) || 0;
-    var rawValue = (length * width * grammage * count) / 1000 * price;
+    var rawTotal = (length * width * grammage * count / 1000) * price;
 
-    // 2. Printing - تُضاف على الخام
+    var selectedDigit = document.querySelector('input[name="digits"]:checked');
+    var digitCount = selectedDigit ? parseInt(selectedDigit.value) : 0;
+
+    var adoptedValue = extractDigits(rawTotal, digitCount);
+    document.getElementById('adoptedRawValue').textContent = Math.floor(adoptedValue) + '$';
+
+    calculateTotal();
+}
+
+/**
+ * Toggle the floating summary expand/collapse
+ */
+function toggleSummaryExpand() {
+    var summary = document.getElementById('floatingSummary');
+    var details = document.getElementById('floatingSummaryDetails');
+    var icon = document.getElementById('expandIcon');
+
+    if (summary.classList.contains('expanded')) {
+        summary.classList.remove('expanded');
+        details.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    } else {
+        summary.classList.add('expanded');
+        details.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+    }
+}
+
+/**
+ * Calculate the total cost and update the floating summary
+ */
+function calculateTotal() {
+    // 1. Raw material (use adopted digit-selected value)
+    var length = parseFloat(document.getElementById('rawLength').value) || 0;
+    var width = parseFloat(document.getElementById('rawWidth').value) || 0;
+    var grammage = parseFloat(document.getElementById('rawGrammage').value) || 0;
+    var count = parseFloat(document.getElementById('rawCount').value) || 0;
+    var price = parseFloat(document.getElementById('rawPrice').value) || 0;
+    var fullRawValue = (length * width * grammage * count / 1000) * price;
+
+    // Apply digit selection
+    var selectedDigit = document.querySelector('input[name="digits"]:checked');
+    var digitCount = selectedDigit ? parseInt(selectedDigit.value) : 0;
+    var rawValue = extractDigits(fullRawValue, digitCount);
+
+    // 2. Printing
     var printingValue = getRadioValue('printing');
 
-    // 3. Cellophane (price per 1000 × quantity) - تُضاف على المجموع
+    // 3. Cellophane (price per 1000 × quantity)
     var cellophaneRate = getRadioValue('cellophane');
     var cellophaneQty = parseFloat(document.getElementById('cellophaneQuantity').value) || 0;
     var cellophaneValue = (cellophaneQty / 1000) * cellophaneRate;
 
-    // 4. Pressing (selectable) - تُضاف على المجموع
+    // 4. Pressing (selectable)
     var pressingValue = getRadioValue('pressing');
 
-    // 5. Thread (optional) - تُضاف على المجموع
+    // 5. Thread (optional)
     var threadValue = 0;
     var threadToggle = document.getElementById('threadToggle');
-    var threadRow = document.getElementById('resThreadRow');
+    var floatThreadRow = document.getElementById('floatThreadRow');
     if (threadToggle.checked) {
         var threadQty = parseFloat(document.getElementById('threadQuantity').value) || 0;
         threadValue = (threadQty / 1000) * THREAD_RATE;
-        threadRow.style.display = 'flex';
+        floatThreadRow.style.display = 'flex';
     } else {
-        threadRow.style.display = 'none';
+        floatThreadRow.style.display = 'none';
     }
 
-    // 6. Mold (optional - fixed 50$) - تُضاف على المجموع
+    // 6. Mold (optional now)
     var moldValue = 0;
     var moldToggle = document.getElementById('moldToggle');
-    var moldRow = document.getElementById('resMoldRow');
+    var floatMoldRow = document.getElementById('floatMoldRow');
     if (moldToggle.checked) {
         moldValue = FIXED_MOLD;
-        moldRow.style.display = 'flex';
+        floatMoldRow.style.display = 'flex';
     } else {
-        moldRow.style.display = 'none';
+        floatMoldRow.style.display = 'none';
     }
 
-    // 7. Glue (optional) - تُضاف على المجموع
+    // 7. Glue (optional)
     var glueValue = 0;
     var glueToggle = document.getElementById('glueToggle');
-    var glueRow = document.getElementById('resGlueRow');
+    var floatGlueRow = document.getElementById('floatGlueRow');
     if (glueToggle.checked) {
         var glueQty = parseFloat(document.getElementById('glueQuantity').value) || 0;
         glueValue = (glueQty / 1000) * GLUE_RATE;
-        glueRow.style.display = 'flex';
+        floatGlueRow.style.display = 'flex';
     } else {
-        glueRow.style.display = 'none';
+        floatGlueRow.style.display = 'none';
     }
 
-    // 8. Transport (optional) - تُضاف على المجموع
+    // 8. Transport (optional)
     var transportValue = 0;
     var transportToggle = document.getElementById('transportToggle');
-    var transportRow = document.getElementById('resTransportRow');
+    var floatTransportRow = document.getElementById('floatTransportRow');
     if (transportToggle.checked) {
         transportValue = parseFloat(document.getElementById('transportCost').value) || 0;
-        transportRow.style.display = 'flex';
+        floatTransportRow.style.display = 'flex';
     } else {
-        transportRow.style.display = 'none';
+        floatTransportRow.style.display = 'none';
     }
 
-    // Update result items
-    document.getElementById('resRaw').textContent = formatPrice(rawValue);
-    document.getElementById('resPrinting').textContent = formatPrice(printingValue);
-    document.getElementById('resCellophane').textContent = formatPrice(cellophaneValue);
-    document.getElementById('resPressing').textContent = formatPrice(pressingValue);
-    document.getElementById('resThread').textContent = formatPrice(threadValue);
-    document.getElementById('resMold').textContent = formatPrice(moldValue);
-    document.getElementById('resGlue').textContent = formatPrice(glueValue);
-    document.getElementById('resTransport').textContent = formatPrice(transportValue);
+    // Update floating summary items
+    document.getElementById('floatResRaw').textContent = formatPrice(rawValue);
+    document.getElementById('floatResPrinting').textContent = formatPrice(printingValue);
+    document.getElementById('floatResCellophane').textContent = formatPrice(cellophaneValue);
+    document.getElementById('floatResPressing').textContent = formatPrice(pressingValue);
+    document.getElementById('floatResThread').textContent = formatPrice(threadValue);
+    document.getElementById('floatResMold').textContent = formatPrice(moldValue);
+    document.getElementById('floatResGlue').textContent = formatPrice(glueValue);
+    document.getElementById('floatResTransport').textContent = formatPrice(transportValue);
 
-    // Calculate total - الجمع التراكمي بالترتيب
-    // الخام + الطباعة + السولوفان + الكبس + الخيط + القالب + اللزق + النقل
+    // Show/hide rows based on value > 0
+    document.getElementById('floatRawRow').style.display = rawValue > 0 ? 'flex' : 'none';
+    document.getElementById('floatPrintingRow').style.display = printingValue > 0 ? 'flex' : 'none';
+    document.getElementById('floatCellophaneRow').style.display = cellophaneValue > 0 ? 'flex' : 'none';
+    document.getElementById('floatPressingRow').style.display = pressingValue > 0 ? 'flex' : 'none';
+
+    // Calculate total
     var total = rawValue + printingValue + cellophaneValue + pressingValue + threadValue + moldValue + glueValue + transportValue;
 
-    // Update total with animation
-    var totalElement = document.getElementById('totalPrice');
-    totalElement.style.transform = 'scale(1.1)';
-    totalElement.textContent = formatPrice(total);
+    // Update floating total with animation
+    var floatingTotalElement = document.getElementById('floatingTotalPrice');
+    floatingTotalElement.style.transform = 'scale(1.1)';
+    floatingTotalElement.textContent = formatPrice(total);
     setTimeout(function() {
-        totalElement.style.transform = 'scale(1)';
+        floatingTotalElement.style.transform = 'scale(1)';
     }, 200);
 }
 
@@ -224,6 +291,11 @@ function resetForm() {
     document.getElementById('rawPrice').value = '';
     document.getElementById('rawWeight').textContent = '0.00';
     document.getElementById('rawTotal').textContent = '0.00$';
+    document.getElementById('digitsSelection').style.display = 'none';
+    document.getElementById('adoptedRawValue').textContent = '0$';
+    // Reset digit selection to "كامل"
+    var fullDigitRadio = document.querySelector('input[name="digits"][value="0"]');
+    if (fullDigitRadio) fullDigitRadio.checked = true;
 
     // Reset radio buttons
     var radios = document.querySelectorAll('input[type="radio"]');
@@ -241,7 +313,7 @@ function resetForm() {
 
     // Reset mold
     document.getElementById('moldToggle').checked = false;
-    document.getElementById('moldCostDisplay').style.display = 'none';
+    document.getElementById('moldInfoBox').style.display = 'none';
 
     // Reset glue
     document.getElementById('glueToggle').checked = false;
