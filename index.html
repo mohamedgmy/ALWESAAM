@@ -44,7 +44,7 @@
                         <span class="section-number">1</span>
                         <div class="section-title">
                             <h2>الخام</h2>
-                            <p>احسب تكلفة المادة الخام: الطول × العرض × الغراماج × العدد ÷ 1000 = الوزن (كغ)، ثم الوزن × السعر = الخام</p>
+                            <p>احسب تكلفة المادة الخام: (الطول × العرض × الغراماج × العدد) ÷ 1000 = الوزن (كغ)، ثم الوزن × السعر = الخام</p>
                         </div>
                     </div>
                     <div class="raw-calc-grid">
@@ -63,7 +63,7 @@
                         </div>
                         <div class="raw-calc-operator">×</div>
                         <div class="raw-calc-field">
-                            <label class="raw-calc-label">الغراماج (غ/م²)</label>
+                            <label class="raw-calc-label">الغراماج</label>
                             <div class="input-wrapper">
                                 <input type="number" id="rawGrammage" min="0" step="0.01" placeholder="0.00" class="text-input" oninput="calculateRaw()">
                             </div>
@@ -78,7 +78,7 @@
                     </div>
                     <div class="raw-result-row">
                         <div class="raw-result-box">
-                            <span class="raw-result-label">الوزن (كغ)</span>
+                            <span class="raw-result-label">الوزن</span>
                             <span class="raw-result-value" id="rawWeight">0.00</span>
                         </div>
                         <div class="raw-calc-operator">=</div>
@@ -91,8 +91,38 @@
                         </div>
                         <div class="raw-calc-operator">=</div>
                         <div class="raw-result-box raw-result-final">
-                            <span class="raw-result-label">الخام</span>
+                            <span class="raw-result-label">الخام (كامل)</span>
                             <span class="raw-result-value" id="rawTotal">0.00$</span>
+                        </div>
+                    </div>
+                    <!-- اختيار عدد الخانات -->
+                    <div class="digits-selection" id="digitsSelection" style="display: none;">
+                        <label class="digits-label">اختر عدد الخانات المعتمدة من سعر الخام:</label>
+                        <div class="digits-options">
+                            <label class="digit-option">
+                                <input type="radio" name="digits" value="2" onchange="applyDigitSelection()">
+                                <span class="digit-btn">2 خانات</span>
+                            </label>
+                            <label class="digit-option">
+                                <input type="radio" name="digits" value="3" onchange="applyDigitSelection()">
+                                <span class="digit-btn">3 خانات</span>
+                            </label>
+                            <label class="digit-option">
+                                <input type="radio" name="digits" value="4" onchange="applyDigitSelection()">
+                                <span class="digit-btn">4 خانات</span>
+                            </label>
+                            <label class="digit-option">
+                                <input type="radio" name="digits" value="5" onchange="applyDigitSelection()">
+                                <span class="digit-btn">5 خانات</span>
+                            </label>
+                            <label class="digit-option">
+                                <input type="radio" name="digits" value="0" checked onchange="applyDigitSelection()">
+                                <span class="digit-btn">كامل</span>
+                            </label>
+                        </div>
+                        <div class="digits-result">
+                            <span class="digits-result-label">القيمة المعتمدة:</span>
+                            <span class="digits-result-value" id="adoptedRawValue">0$</span>
                         </div>
                     </div>
                 </div>
@@ -315,7 +345,7 @@
                             <span class="toggle-slider"></span>
                             <span class="toggle-label">تفعيل القالب</span>
                         </label>
-                        <div class="mold-cost-display" id="moldCostDisplay" style="display: none;">
+                        <div class="mold-info" id="moldInfoBox" style="display: none;">
                             <div class="fixed-value-card">
                                 <span class="fixed-label">التكلفة الثابتة</span>
                                 <span class="fixed-price">50$</span>
@@ -380,64 +410,70 @@
                 </div>
 
             </form>
-
-            <!-- بطاقة النتيجة (ملخص التكلفة) -->
-            <div class="result-card" id="resultCard">
-                <div class="result-header">
-                    <h2>ملخص التكلفة</h2>
-                    <button class="reset-btn" onclick="resetForm()" title="إعادة تعيين">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M3 10a7 7 0 0112.9-3.7M17 10a7 7 0 01-12.9 3.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M3 4v3.3h3.3M17 16v-3.3h-3.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        إعادة تعيين
-                    </button>
-                </div>
-                <div class="result-items" id="resultItems">
-                    <div class="result-item">
-                        <span class="item-name">الخام</span>
-                        <span class="item-value" id="resRaw">0.00$</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="item-name">الطباعة</span>
-                        <span class="item-value" id="resPrinting">0.00$</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="item-name">السولوفان</span>
-                        <span class="item-value" id="resCellophane">0.00$</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="item-name">الكبس</span>
-                        <span class="item-value" id="resPressing">0.00$</span>
-                    </div>
-                    <div class="result-item" id="resThreadRow" style="display: none;">
-                        <span class="item-name">الخيط</span>
-                        <span class="item-value" id="resThread">0.00$</span>
-                    </div>
-                    <div class="result-item" id="resMoldRow">
-                        <span class="item-name">القالب</span>
-                        <span class="item-value" id="resMold">0.00$</span>
-                    </div>
-                    <div class="result-item" id="resGlueRow" style="display: none;">
-                        <span class="item-name">اللزق</span>
-                        <span class="item-value" id="resGlue">0.00$</span>
-                    </div>
-                    <div class="result-item" id="resTransportRow" style="display: none;">
-                        <span class="item-name">النقل</span>
-                        <span class="item-value" id="resTransport">0.00$</span>
-                    </div>
-                </div>
-                <div class="result-total">
-                    <span class="total-label">السعر النهائي</span>
-                    <span class="total-value" id="totalPrice">0.00$</span>
-                </div>
-            </div>
         </main>
 
         <!-- الفوتر -->
         <footer class="footer">
             <p>© 2026 مطبعة الوسام — كافة فنون الطباعة الحديثة</p>
         </footer>
+    </div>
+
+    <!-- ملخص التكلفة العائم -->
+    <div class="floating-summary" id="floatingSummary">
+        <div class="floating-summary-toggle" id="floatingSummaryToggle" onclick="toggleSummaryExpand()">
+            <div class="floating-total-row">
+                <span class="floating-total-label">السعر النهائي</span>
+                <span class="floating-total-value" id="floatingTotalPrice">0.00$</span>
+            </div>
+            <div class="floating-expand-icon" id="expandIcon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+        <div class="floating-summary-details" id="floatingSummaryDetails">
+            <div class="floating-items">
+                <div class="floating-item" id="floatRawRow">
+                    <span class="floating-item-name">الخام</span>
+                    <span class="floating-item-value" id="floatResRaw">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatPrintingRow">
+                    <span class="floating-item-name">الطباعة</span>
+                    <span class="floating-item-value" id="floatResPrinting">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatCellophaneRow">
+                    <span class="floating-item-name">السولوفان</span>
+                    <span class="floating-item-value" id="floatResCellophane">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatPressingRow">
+                    <span class="floating-item-name">الكبس</span>
+                    <span class="floating-item-value" id="floatResPressing">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatThreadRow" style="display: none;">
+                    <span class="floating-item-name">الخيط</span>
+                    <span class="floating-item-value" id="floatResThread">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatMoldRow" style="display: none;">
+                    <span class="floating-item-name">القالب</span>
+                    <span class="floating-item-value" id="floatResMold">50.00$</span>
+                </div>
+                <div class="floating-item" id="floatGlueRow" style="display: none;">
+                    <span class="floating-item-name">اللزق</span>
+                    <span class="floating-item-value" id="floatResGlue">0.00$</span>
+                </div>
+                <div class="floating-item" id="floatTransportRow" style="display: none;">
+                    <span class="floating-item-name">النقل</span>
+                    <span class="floating-item-value" id="floatResTransport">0.00$</span>
+                </div>
+            </div>
+            <button class="reset-btn floating-reset-btn" onclick="resetForm()" title="إعادة تعيين">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M3 10a7 7 0 0112.9-3.7M17 10a7 7 0 01-12.9 3.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M3 4v3.3h3.3M17 16v-3.3h-3.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                إعادة تعيين
+            </button>
+        </div>
     </div>
 
     <script src="./script.js"></script>
